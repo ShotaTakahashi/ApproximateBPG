@@ -20,7 +20,7 @@ def plot_csv_results(paths, titles=None, labels=None, opts=None, logs=None):
         for i in range(len(paths)):
             df = dfs[i]
             linestyle = linestyles[i % len(linestyles)]
-            x = df['Iter']
+            x = df['iter']
             y = df[column]
             if opts is not None and column in opts.keys():
                 y = y - opts[column]

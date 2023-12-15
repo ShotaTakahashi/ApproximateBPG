@@ -100,8 +100,8 @@ if __name__ == '__main__':
     csv_paths = [csv_path]
     funcs = {'obj': obj, 'acc': lambda x: LA.norm(x - xopt), 'grad': lambda x: LA.norm(grad_f(x))}
 
-    abpg = ApproxBPG(x0, lsmad, grad_f, subprob_sol, bregman_dist, obj, reg, write=True)
-    abpg.run(result_dir=csv_path, funcs=funcs)
+    abpg = ApproxBPG(x0, obj, grad_f, xopt, lsmad, subprob_sol, bregman_dist, reg, stop='diff', csv_path=csv_path)
+    abpg.run()
     np.save(path, abpg.xk)
     np.save(dir_path + '{}-{}-{}-{}-{}-{}'.format(nprob, n, m, sparsity, theta, lsmad)+'-gt', xopt)
 
@@ -109,27 +109,25 @@ if __name__ == '__main__':
     path = dir_path + '{}-{}-{}-{}-{}-{}-{}'.format(nprob, nalg, n, m, sparsity, theta, lsmad)
     csv_path = path + '.csv'
     csv_paths.append(csv_path)
-    bpg = BPG(x0, lsmad, grad_f, subprob_sol_bpg, bregman_dist, write=True)
-    bpg.run(result_dir=csv_path, funcs=funcs)
+    bpg = BPG(x0, obj, grad_f, xopt, lsmad, subprob_sol_bpg, bregman_dist, stop='diff', csv_path=csv_path)
+    bpg.run()
     np.save(path, bpg.xk)
 
     nalg = 'pgl'
     path = dir_path + '{}-{}-{}-{}-{}-{}-{}'.format(nprob, nalg, n, m, sparsity, theta, lsmad)
     csv_path = path + '.csv'
     csv_paths.append(csv_path)
-    pg = PG(x0, lsmad, loss, grad_f, subprob_sol_pg, linesearch=True, write=True)
-    pg.run(result_dir=csv_path, funcs=funcs)
+    pg = PG(x0, obj, grad_f, xopt, lsmad, subprob_sol_pg, loss, linesearch=True, stop='diff', csv_path=csv_path)
+    pg.run()
     np.save(path, pg.xk)
 
     titles = {'obj': 'objective function values',
-              'reg': 'regularization function values',
               'acc': 'accuracy',
               'diff': 'difference of iteration',
               'grad': 'norm of gradient'}
-    labels = {'Iter': 'k', 'obj': r'$\log_{10}\Psi(x^k)$',
-              'reg': r'$\log_{10}g(x^k)$',
+    labels = {'iter': 'k', 'obj': r'$\log_{10}\Psi(x^k)$',
               'acc': r'$\log_{10}||x^k - x^*||$',
               'diff': r'$\log_{10}||x^k - x^{k-1}||$',
               'grad': r'$\|\nabla f(x^k)\|$'}
-    logs = {'obj': True, 'reg': True, 'acc': True, 'diff': True, 'grad': True}
+    logs = {'obj': True, 'acc': True, 'diff': True, 'grad': True}
     plot_csv_results(csv_paths, titles=titles, labels=labels, logs=logs)

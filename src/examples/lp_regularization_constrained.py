@@ -105,8 +105,8 @@ if __name__ == '__main__':
     csv_paths = [csv_path]
     funcs = {'obj': obj, 'acc': lambda x: LA.norm(x - xopt), 'grad': lambda x: LA.norm(grad_f(x))}
 
-    abpg = ApproxBPG(x0, lsmad, grad_f, subprob_sol, bregman_dist, obj, reg, write=True)
-    abpg.run(result_dir=csv_path, funcs=funcs)
+    abpg = ApproxBPG(x0, obj, grad_f, xopt, lsmad, subprob_sol, bregman_dist, reg, stop='diff', csv_path=csv_path)
+    abpg.run()
     np.save(path, abpg.xk)
     np.save(dir_path + '{}-{}-{}-{}-{}-{}'.format(nprob, n, m, sparsity, theta, lsmad)+'-gt', xopt)
 
@@ -114,32 +114,32 @@ if __name__ == '__main__':
     path = dir_path + '{}-{}-{}-{}-{}-{}-{}'.format(nprob, nalg, n, m, sparsity, theta, lsmooth)
     csv_path = path + '.csv'
     csv_paths.append(csv_path)
-    pg = PG(x0, lsmooth, loss, grad_f, subprob_sol_pg, write=True)
-    pg.run(result_dir=csv_path, funcs=funcs)
+    pg = PG(x0, obj, grad_f, xopt, lsmooth, subprob_sol_pg, loss, linesearch=False, stop='diff', csv_path=csv_path)
+    pg.run()
     np.save(path, pg.xk)
 
     nalg = 'pgl'
     path = dir_path + '{}-{}-{}-{}-{}-{}-{}'.format(nprob, nalg, n, m, sparsity, theta, lsmooth)
     csv_path = path + '.csv'
     csv_paths.append(csv_path)
-    pg = PG(x0, lsmooth, loss, grad_f, subprob_sol_pg, linesearch=True, write=True)
-    pg.run(result_dir=csv_path, funcs=funcs)
+    pg = PG(x0, obj, grad_f, xopt, lsmooth, subprob_sol_pg, loss, linesearch=True, stop='diff', csv_path=csv_path)
+    pg.run()
     np.save(path, pg.xk)
 
     nalg = 'rn'
     path = dir_path + '{}-{}-{}-{}-{}-{}-{}'.format(nprob, nalg, n, m, sparsity, theta, h)
     csv_path = path + '.csv'
     csv_paths.append(csv_path)
-    newton = PG(x0, 1, loss, grad_f, subprob_sol_rnewton, write=True)
-    newton.run(result_dir=csv_path, funcs=funcs)
+    newton = PG(x0, obj, grad_f, xopt, 1, subprob_sol_rnewton, loss, stop='diff', csv_path=csv_path)
+    newton.run()
     np.save(path, newton.xk)
 
     titles = {'obj': 'objective function values',
-              'reg': 'regularization function values',
+              'diff': 'difference of iteration',
               'acc': 'accuracy',
               'grad': 'gradient values'}
-    labels = {'Iter': 'k', 'obj': r'$\log_{10}\Psi(x^k)$',
-              'reg': r'$\log_{10}g(x^k)$',
+    labels = {'iter': 'k', 'obj': r'$\log_{10}\Psi(x^k)$',
+              'diff': r'$\log_{10}||x^k - x^{k-1}||$',
               'acc': r'$\log_{10}||x^k - x^*||$',
               'grad': r'$\log_{10}||\nabla f(x^k)||$'}
     logs = {'obj': True, 'reg': True, 'acc': True, 'grad': True}

@@ -1,30 +1,28 @@
 import numpy as np
-from src.algorithms.iteration import Algorithm
+from src.algorithms.iteration import FOM
 
 
-class BPG(Algorithm):
-    def __init__(self, x0, lsmad, grad, subprob_sol, bregman_dist, stop='diff', write=False):
-        super().__init__(x0, stop, write)
+class BPG(FOM):
+    def __init__(self, x0, obj, grad, opt, lsmad, subprob, bregman_dist, stop='diff', csv_path=''):
+        super().__init__(x0, obj, grad, opt, stop, csv_path)
         self.lsmad = lsmad
-        self.grad = grad
-        self.subprob_sol = subprob_sol
+        self.subprob = subprob
         self.rho = 0.99
         self.bregman_dist = bregman_dist
 
     def update(self, x):
         grad = self.grad(x)
-        xk = self.subprob_sol(x, grad, self.lsmad)
+        xk = self.subprob(x, grad, self.lsmad)
         return xk
 
     def adaptive_scheme(self):
         return self.bregman_dist(self.xk, self.yk) \
-            > self.rho * self.bregman_dist(self.xk_1, self.xk)
+            > self.rho * self.bregman_dist(self.xk_old, self.xk)
 
 
 class ApproxBPG(BPG):
-    def __init__(self, x0, lsmad, grad, subprob_sol, bregman_dist, obj, reg, alpha=0.99, eta=0.9, stop='diff', write=False):
-        super().__init__(x0, lsmad, grad, subprob_sol, bregman_dist, stop, write)
-        self.obj = obj
+    def __init__(self, x0, obj, grad, opt, lsmad, subprob, bregman_dist, reg, alpha=0.99, eta=0.9, stop='diff', csv_path=''):
+        super().__init__(x0, obj, grad, opt, lsmad, subprob, bregman_dist, stop, csv_path)
         self.reg = reg
         self.t_init = 1.0
         self.alpha = alpha
@@ -32,7 +30,7 @@ class ApproxBPG(BPG):
 
     def update(self, x):
         grad = self.grad(x)
-        dk = self.subprob_sol(x, grad, self.lsmad) - x
+        dk = self.subprob(x, grad, self.lsmad) - x
         obj_xk = self.obj(x)
         const = np.dot(grad, dk) + self.reg(x + dk) - self.reg(x)
         tk = self.t_init
