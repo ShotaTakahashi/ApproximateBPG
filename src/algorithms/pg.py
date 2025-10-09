@@ -13,7 +13,7 @@ class PG(FOM):
         self.rho = 0.99
         self.eta = 2
 
-    def update(self, x):
+    def update(self, x, y):
         grad = self.grad(x)
         loss_xk = self.loss(x)
         l = self.lsmooth

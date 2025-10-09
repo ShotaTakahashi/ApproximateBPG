@@ -30,7 +30,7 @@ def hess_f(x):
 
 
 def kernel(x):
-    return LA.norm(x)**2/2 + np.sum(np.abs(np.power(x, p)))/p
+    return LA.norm(x)**2/2 + np.sum(np.power(np.abs(x), p))/p
 
 
 def grad_kernel(x):

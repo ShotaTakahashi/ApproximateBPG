@@ -21,7 +21,7 @@ class Extrapolation(Iteration):
         self.__restart = self.restart_iter
 
     def adaptive_scheme(self):
-        return np.dot(self.yk - self.xk, self.xk - self.xk_old) > 0
+        return np.dot(self.yk - self.xk, self.xk - self.xk_old) > 0 or any(self.yk < 0)
 
     def beta_update(self):
         self.beta = (self.__theta_old - 1) / self.__theta
@@ -53,14 +53,14 @@ class FOM(Extrapolation):
             self.write = True
             self.file = open(self.csv_path, 'w')
             self.writer = csv.writer(self.file, lineterminator='\n')
-            self.writer.writerow(['iter', 'obj', 'acc', 'grad', 'diff'])
+            self.writer.writerow(['iter', 'time', 'obj', 'acc', 'grad', 'diff'])
             self.writer.writerow(
-                [self.iter, self.obj(self.xk), LA.norm(self.xk - self.opt), LA.norm(self.grad(self.xk)), LA.norm(self.xk - self.xk_old)])
+                [self.iter, 0.0, self.obj(self.xk), LA.norm(self.xk - self.opt), LA.norm(self.grad(self.xk)), LA.norm(self.xk - self.xk_old)])
         self.time = 0.0
         self.stop = stop
 
     @abstractmethod
-    def update(self, x):
+    def update(self, x, y):
         pass
 
     def run(self, extrapolation=False):
@@ -74,10 +74,10 @@ class FOM(Extrapolation):
                 self.beta = 0.0
 
             self.yk = self.xk + self.beta*(self.xk - self.xk_old)
-            self.xk_old, self.xk = self.xk, self.update(self.yk)
+            self.xk_old, self.xk = self.xk, self.update(self.xk, self.yk)
             if self.write:
                 self.writer.writerow(
-                    [self.iter, self.obj(self.xk), LA.norm(self.xk - self.opt), LA.norm(self.grad(self.xk)), LA.norm(self.xk - self.xk_old)])
+                    [self.iter, time.time()-start, self.obj(self.xk), LA.norm(self.xk - self.opt), LA.norm(self.grad(self.xk)), LA.norm(self.xk - self.xk_old)])
 
             if self.stop_criteria():
                 break
