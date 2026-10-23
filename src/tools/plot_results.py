@@ -44,4 +44,4 @@ def plot_csv_results(paths, titles=None, labels=None, opts=None, logs=None):
         filename = re.sub('-.+?-', '-', filename, count=1)
         filename = '{}-{}plot.png'.format(filename, column)
         plt.savefig(filename, dpi=100, bbox_inches='tight')
-        plt.show(bbox_inches='tight')
+        plt.show()
